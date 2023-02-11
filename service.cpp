@@ -2206,14 +2206,14 @@ void throttle_restart(nssm_service_t *service) {
            0 if the wait completed.
           -1 on error.
 */
-int await_single_handle(SERVICE_STATUS_HANDLE status_handle, SERVICE_STATUS *status, HANDLE handle, TCHAR *name, TCHAR *function_name, unsigned long timeout) {
+int await_single_handle(SERVICE_STATUS_HANDLE status_handle, SERVICE_STATUS *status, HANDLE handle, TCHAR *name, const TCHAR *function_name, unsigned long timeout) {
   unsigned long interval;
   unsigned long ret;
   unsigned long waited;
   TCHAR interval_milliseconds[16];
   TCHAR timeout_milliseconds[16];
   TCHAR waited_milliseconds[16];
-  TCHAR *function = function_name;
+  TCHAR *function = const_cast<TCHAR*>(function_name);
 
   /* Add brackets to function name. */
   size_t funclen = _tcslen(function_name) + 3;
