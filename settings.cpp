@@ -246,7 +246,7 @@ static int setting_dump_exit_action(const TCHAR *service_name, void *param, cons
     if (ret == ERROR_NO_MORE_ITEMS) break;
     if (ret != ERROR_SUCCESS) continue;
     bool valid = true;
-    int i;
+    unsigned int i;
     for (i = 0; i < _countof(code); i++) {
       if (! code[i]) break;
       if (code[i] >= _T('0') || code[i] <= _T('9')) continue;
