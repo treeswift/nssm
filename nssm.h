@@ -32,7 +32,7 @@
 #endif
 #define DIR_LENGTH PATH_LENGTH - 12
 
-#define _WIN32_WINNT 0x0500
+#define _WIN32_WINNT 0x0600 /* Vista */
 
 #define APSTUDIO_HIDDEN_SYMBOLS
 #include <windows.h>
@@ -58,8 +58,9 @@
 #include "process.h"
 #include "registry.h"
 #include "settings.h"
-#include "io.h"
+#include "nssmio.h"
 #include "gui.h"
+#include "winver.h"
 #endif
 
 void nssm_exit(int);
@@ -73,6 +74,7 @@ int usage(int);
 const TCHAR *nssm_unquoted_imagepath();
 const TCHAR *nssm_imagepath();
 const TCHAR *nssm_exe();
+bool allow_console_inheritance();
 
 #define NSSM _T("NSSM")
 #ifdef _WIN64

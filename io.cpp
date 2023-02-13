@@ -318,7 +318,8 @@ int get_output_handles(nssm_service_t *service, STARTUPINFO *si) {
       return 2;
     }
 
-    inherit_handles = true;
+    inherit_handles = true;
+
   }
 
   /* stdout */
@@ -345,7 +346,8 @@ int get_output_handles(nssm_service_t *service, STARTUPINFO *si) {
 
     if (dup_handle(service->stdout_si, &si->hStdOutput, _T("stdout_si"), _T("stdout"))) close_handle(&service->stdout_thread);
 
-    inherit_handles = true;
+    inherit_handles = true;
+
   }
 
   /* stderr */
@@ -385,14 +387,32 @@ int get_output_handles(nssm_service_t *service, STARTUPINFO *si) {
 
     if (dup_handle(service->stderr_si, &si->hStdError, _T("stderr_si"), _T("stderr"))) close_handle(&service->stderr_thread);
 
-    inherit_handles = true;
+    inherit_handles = true;
+
   }
 
   /*
     We need to set the startup_info flags to make the new handles
     inheritable by the new process.
   */
+if(allow_console_inheritance) {
+  si->dwFlags |= STARTF_USESTDHANDLES;
+
+  if (service->no_console) return 0;
+
+  /* Redirect other handles. */
+  if (! si->hStdInput) {
+    if (dup_handle(GetStdHandle(STD_INPUT_HANDLE), &si->hStdInput, _T("STD_INPUT_HANDLE"), _T("stdin"))) return 8;
+  }
+  if (! si->hStdOutput) {
+    if (dup_handle(GetStdHandle(STD_OUTPUT_HANDLE), &si->hStdOutput, _T("STD_OUTPUT_HANDLE"), _T("stdout"))) return 9;
+  }
+  if (! si->hStdError)  {
+    if (dup_handle(GetStdHandle(STD_ERROR_HANDLE), &si->hStdError, _T("STD_ERROR_HANDLE"), _T("stderr"))) return 10;
+  }
+} else {
   if (inherit_handles) si->dwFlags |= STARTF_USESTDHANDLES;
+}
 
   return 0;
 }

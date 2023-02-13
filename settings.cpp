@@ -246,7 +246,7 @@ static int setting_dump_exit_action(const TCHAR *service_name, void *param, cons
     if (ret == ERROR_NO_MORE_ITEMS) break;
     if (ret != ERROR_SUCCESS) continue;
     bool valid = true;
-    int i;
+    unsigned int i;
     for (i = 0; i < _countof(code); i++) {
       if (! code[i]) break;
       if (code[i] >= _T('0') || code[i] <= _T('9')) continue;
@@ -255,7 +255,7 @@ static int setting_dump_exit_action(const TCHAR *service_name, void *param, cons
     }
     if (! valid) continue;
 
-    TCHAR *additional = (code[i]) ? code : NSSM_DEFAULT_STRING;
+    TCHAR *additional = (code[i]) ? code : const_cast<TCHAR*>(NSSM_DEFAULT_STRING);
 
     ret = setting_get_exit_action(service_name, 0, name, default_value, value, additional);
     if (ret == 1) {
@@ -1438,11 +1438,11 @@ settings_t settings[] = {
   { NSSM_REG_TIMESTAMP_LOG, REG_DWORD, 0, false, 0, setting_set_number, setting_get_number, 0 },
   { NSSM_NATIVE_DEPENDONGROUP, REG_MULTI_SZ, NULL, true, ADDITIONAL_CRLF, native_set_dependongroup, native_get_dependongroup, native_dump_dependongroup },
   { NSSM_NATIVE_DEPENDONSERVICE, REG_MULTI_SZ, NULL, true, ADDITIONAL_CRLF, native_set_dependonservice, native_get_dependonservice, native_dump_dependonservice },
-  { NSSM_NATIVE_DESCRIPTION, REG_SZ, _T(""), true, 0, native_set_description, native_get_description, 0 },
+  { NSSM_NATIVE_DESCRIPTION, REG_SZ, const_cast<TCHAR*>(_T("")), true, 0, native_set_description, native_get_description, 0 },
   { NSSM_NATIVE_DISPLAYNAME, REG_SZ, NULL, true, 0, native_set_displayname, native_get_displayname, 0 },
   { NSSM_NATIVE_ENVIRONMENT, REG_MULTI_SZ, NULL, true, ADDITIONAL_CRLF, native_set_environment, native_get_environment, native_dump_environment },
   { NSSM_NATIVE_IMAGEPATH, REG_EXPAND_SZ, NULL, true, 0, native_set_imagepath, native_get_imagepath, setting_not_dumpable },
-  { NSSM_NATIVE_OBJECTNAME, REG_SZ, NSSM_LOCALSYSTEM_ACCOUNT, true, 0, native_set_objectname, native_get_objectname, native_dump_objectname },
+  { NSSM_NATIVE_OBJECTNAME, REG_SZ, const_cast<TCHAR*>(NSSM_LOCALSYSTEM_ACCOUNT), true, 0, native_set_objectname, native_get_objectname, native_dump_objectname },
   { NSSM_NATIVE_NAME, REG_SZ, NULL, true, 0, native_set_name, native_get_name, setting_not_dumpable },
   { NSSM_NATIVE_STARTUP, REG_SZ, NULL, true, 0, native_set_startup, native_get_startup, 0 },
   { NSSM_NATIVE_TYPE, REG_SZ, NULL, true, 0, native_set_type, native_get_type, 0 },

@@ -2,6 +2,7 @@
 
 #define NSSM_SOURCE _T("nssm")
 #define NSSM_ERROR_BUFSIZE 65535
+#define NSSM_ERROR_SMALL_BUFSZ MAX_PATH
 #define NSSM_NUM_EVENT_STRINGS 16
 unsigned long tls_index;
 
@@ -28,8 +29,8 @@ TCHAR *message_string(unsigned long error) {
   TCHAR *ret;
   if (! FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, GetUserDefaultLangID(), (LPTSTR) &ret, NSSM_ERROR_BUFSIZE, 0)) {
     if (! FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, (LPTSTR) &ret, NSSM_ERROR_BUFSIZE, 0)) {
-      ret = (TCHAR *) HeapAlloc(GetProcessHeap(), 0, 32 * sizeof(TCHAR));
-      if (_sntprintf_s(ret, NSSM_ERROR_BUFSIZE, _TRUNCATE, _T("system error %lu"), error) < 0) return 0;
+      ret = (TCHAR *) HeapAlloc(GetProcessHeap(), 0, NSSM_ERROR_SMALL_BUFSZ * sizeof(TCHAR));
+      if (_sntprintf_s(ret, NSSM_ERROR_SMALL_BUFSZ, _TRUNCATE, _T("system error 0x%08x (resource error 0x%08x)"), error, GetLastError()) < 0) return 0;
     }
   }
   return ret;

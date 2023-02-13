@@ -326,7 +326,8 @@ void walk_process_tree(nssm_service_t *service, walk_function_t fn, kill_t *k, u
   TCHAR pid_string[16], code[16];
   _sntprintf_s(pid_string, _countof(pid_string), _TRUNCATE, _T("%lu"), pid);
   _sntprintf_s(code, _countof(code), _TRUNCATE, _T("%lu"), k->exitcode);
-  if (fn == kill_process) log_event(EVENTLOG_INFORMATION_TYPE, NSSM_EVENT_KILLING, k->name, pid_string, code, 0);
+  walk_function_t kp = kill_process; // overload disambiguation needs a static type
+  if (fn == kp) log_event(EVENTLOG_INFORMATION_TYPE, NSSM_EVENT_KILLING, k->name, pid_string, code, 0);
 
   /* We will need a process handle in order to call TerminateProcess() later. */
   HANDLE process_handle = OpenProcess(SYNCHRONIZE | PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_TERMINATE, false, pid);
@@ -334,7 +335,7 @@ void walk_process_tree(nssm_service_t *service, walk_function_t fn, kill_t *k, u
     /* Kill this process first, then its descendents. */
     TCHAR ppid_string[16];
     _sntprintf_s(ppid_string, _countof(ppid_string), _TRUNCATE, _T("%lu"), ppid);
-    if (fn == kill_process) log_event(EVENTLOG_INFORMATION_TYPE, NSSM_EVENT_KILL_PROCESS_TREE, pid_string, ppid_string, k->name, 0);
+    if (fn == kp) log_event(EVENTLOG_INFORMATION_TYPE, NSSM_EVENT_KILL_PROCESS_TREE, pid_string, ppid_string, k->name, 0);
     k->process_handle = process_handle; /* XXX: open directly? */
     if (! fn(service, k)) {
       /* Maybe it already died. */
