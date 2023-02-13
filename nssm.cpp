@@ -4,6 +4,22 @@ extern unsigned long tls_index;
 extern bool is_admin;
 extern imports_t imports;
 
+struct {
+    bool known;
+    DWORD maj, min, bld;
+
+    bool pre_creators = true; // set in _tmain()), but default-initialized here to prevent indeterminacy
+
+    void init() {
+      pre_creators = get_win_version(&maj, &min, &bld) && bld < 15063; // Creators update
+    }
+
+} win_ver;
+
+bool allow_console_inheritance() {
+    return win_ver.pre_creators;
+}
+
 static TCHAR unquoted_imagepath[PATH_LENGTH];
 static TCHAR imagepath[PATH_LENGTH];
 static TCHAR imageargv0[PATH_LENGTH];
@@ -240,6 +256,8 @@ const TCHAR *nssm_exe() {
 }
 
 int _tmain(int argc, TCHAR **argv) {
+  win_ver.init();
+
   if (check_console()) setup_utf8();
 
   /* Remember if we are admin */

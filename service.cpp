@@ -1875,12 +1875,12 @@ int start_service(nssm_service_t *service) {
     /* Set up I/O redirection. */
     if (get_output_handles(service, &si)) {
       log_event(EVENTLOG_ERROR_TYPE, NSSM_EVENT_GET_OUTPUT_HANDLES_FAILED, service->name, 0);
-      FreeConsole();
+      if (! service->no_console || !allow_console_inheritance()) FreeConsole();
       close_output_handles(&si);
       unset_service_environment(service);
       return stop_service(service, 4, true, true);
     }
-    FreeConsole();
+    if(!allow_console_inheritance()) FreeConsole();
 
     /* Pre-start hook. May need I/O to have been redirected already. */
     if (nssm_hook(&hook_threads, service, NSSM_HOOK_EVENT_START, NSSM_HOOK_ACTION_PRE, &control, NSSM_SERVICE_STATUS_DEADLINE, false) == NSSM_HOOK_STATUS_ABORT) {
@@ -1898,7 +1898,7 @@ int start_service(nssm_service_t *service) {
     if (si.dwFlags & STARTF_USESTDHANDLES) inherit_handles = true;
     unsigned long flags = service->priority & priority_mask();
     if (service->affinity) flags |= CREATE_SUSPENDED;
-    if (! service->no_console) flags |= CREATE_NEW_CONSOLE;
+    if (! service->no_console && !allow_console_inheritance()) flags |= CREATE_NEW_CONSOLE;
 
     if (! CreateProcess(0, cmd, 0, 0, inherit_handles, flags, 0, service->dir, &si, &pi)) {
       unsigned long exitcode = 3;
@@ -1915,6 +1915,8 @@ int start_service(nssm_service_t *service) {
     if (get_process_creation_time(service->process_handle, &service->creation_time)) ZeroMemory(&service->creation_time, sizeof(service->creation_time));
 
     close_output_handles(&si);
+
+    if (allow_console_inheritance() && ! service->no_console) FreeConsole();
 
     if (service->affinity) {
       /*
